@@ -27,7 +27,7 @@ export default function Home() {
 
       const data = await response.json();
       if (response.status !== 200) {
-        throw data.error || new Error(`Request failed with status ${response.status}`);
+        throw new Error(`Request failed with status ${response.status}`);
       }
 
       handleState('result', data.result)
