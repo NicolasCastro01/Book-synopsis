@@ -34,7 +34,6 @@ export default function Home() {
       handleState('bookInput', '');
     } catch(error) {
       console.error(error);
-      alert(error.message);
     } finally {
       handleState('loading', false)
     }
