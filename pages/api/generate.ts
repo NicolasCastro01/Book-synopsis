@@ -30,7 +30,7 @@ export default async function (req, res) {
     const completion = await openai.createCompletion({
       model: "text-davinci-003",
       prompt: generetePromptBook(book),
-      top_p: 0.1,
+      temperature: 0,
       max_tokens: 2048
     });
     res.status(200).json({ result: completion.data.choices[0].text });
@@ -52,9 +52,9 @@ export default async function (req, res) {
 
 function generetePromptBook(book){
   return `
-    Me diga a sinopse desse livro
+    Me diga a sinopse do livro do escritor
 
-    Livro: ${book}
+    Nome do livro e o escritor: ${book}
     Sinopse:
   `
 }

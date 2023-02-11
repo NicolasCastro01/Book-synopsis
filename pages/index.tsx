@@ -56,7 +56,7 @@ export default function Home() {
           <input
             type="text"
             name="book"
-            placeholder="Enter an book"
+            placeholder="Enter an book and your author"
             value={state.bookInput}
             onChange={({target:{value}}) => handleState('bookInput', value)}
             disabled={state.loading}
