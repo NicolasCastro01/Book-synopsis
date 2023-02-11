@@ -34,6 +34,9 @@ export default function Home() {
       handleState('bookInput', '');
     } catch(error) {
       console.error(error);
+      if(error.response.status === 504){
+        onSubmit(event)
+      }
     } finally {
       handleState('loading', false)
     }
