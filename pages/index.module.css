@@ -25,13 +25,16 @@
 .main {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   padding-top: 60px;
+  width: 100%;
+  height: 100vh;
 }
 
 .main .icon {
   width: 34px;
-  mix-blend-mode: color-burn;
+  mix-blend-mode: multiply;
 }
 
 .main h3 {
@@ -79,6 +82,7 @@
 .main .result {
   font-weight: bold;
   margin-top: 40px;
-  width: 600px;
+  max-width: 600px;
   text-align: justify;
+  padding: 0 10px;
 }
