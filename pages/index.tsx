@@ -3,18 +3,26 @@ import { useState } from "react";
 import styles from "./index.module.css";
 
 export default function Home() {
-  const [animalInput, setAnimalInput] = useState("");
-  const [result, setResult] = useState();
+  const [state, setState] = useState({
+    result: '',
+    bookInput: '',
+    loading: false
+  });
+
+  function handleState(key: string, value: string | boolean){
+    setState(prevState => ({...prevState, [key]: value}))
+  }
 
   async function onSubmit(event) {
     event.preventDefault();
     try {
+      handleState('loading', true)
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ animal: animalInput }),
+        body: JSON.stringify({ book: state.bookInput }),
       });
 
       const data = await response.json();
@@ -22,36 +30,38 @@ export default function Home() {
         throw data.error || new Error(`Request failed with status ${response.status}`);
       }
 
-      setResult(data.result);
-      setAnimalInput("");
+      handleState('result', data.result)
+      handleState('bookInput', '');
     } catch(error) {
-      // Consider implementing your own error handling logic here
       console.error(error);
       alert(error.message);
+    } finally {
+      handleState('loading', false)
     }
   }
 
   return (
     <div>
       <Head>
-        <title>OpenAI Quickstart</title>
+        <title>Book synopsis</title>
         <link rel="icon" href="/dog.png" />
       </Head>
 
       <main className={styles.main}>
         <img src="/dog.png" className={styles.icon} />
-        <h3>Name my pet</h3>
+        <h3>Book synopsis</h3>
         <form onSubmit={onSubmit}>
           <input
             type="text"
-            name="animal"
-            placeholder="Enter an animal"
-            value={animalInput}
-            onChange={(e) => setAnimalInput(e.target.value)}
+            name="book"
+            placeholder="Enter an book"
+            value={state.bookInput}
+            onChange={({target:{value}}) => handleState('bookInput', value)}
+            disabled={state.loading}
           />
-          <input type="submit" value="Generate names" />
+          <input type="submit" value="Book synopsis" disabled={state.loading}/>
         </form>
-        <div className={styles.result}>{result}</div>
+        <div className={styles.result}>{state.result}</div>
       </main>
     </div>
   );
