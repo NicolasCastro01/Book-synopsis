@@ -1,4 +1,7 @@
+import { createReadStream } from "fs";
+import { TransformStream } from "node:stream/web";
 import { Configuration, OpenAIApi } from "openai";
+import { Readable, Transform } from "stream";
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -6,6 +9,18 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default async function (req, res) {
+
+  if(req.method === 'GET'){
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Access-Control-Allow-Origin': '*',
+      'Connection': 'keep-alive'
+    })
+    res.flushHeaders()
+    res.end()
+    return
+  }
+
   if (!configuration.apiKey) {
     res.status(500).json({
       error: {
@@ -29,13 +44,16 @@ export default async function (req, res) {
   try {
     const completion = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: generetePromptBook(book),
+      prompt: generatePromptBook(book),
       temperature: 0,
-      max_tokens: 2048
-    });
-    res.status(200).json({ result: completion.data.choices[0].text });
+      max_tokens: 2048,
+      stream: true
+    },
+    {responseType: 'stream'}) as any;
+
+    completion.data.pipe(res)
+    
   } catch (error) {
-    // Consider adjusting the error handling logic for your use case
     if (error.response) {
       console.error(error.response.status, error.response.data);
       res.status(error.response.status).json(error.response.data);
@@ -50,11 +68,11 @@ export default async function (req, res) {
   }
 }
 
-function generetePromptBook(book){
+function generatePromptBook(book){
   return `
-    Me diga a sinopse do livro do escritor
+    Pesquise a sinopse do livro e me retorne
 
-    Nome do livro e o escritor: ${book}
+    Nome do livro: ${book}
     Sinopse:
   `
 }

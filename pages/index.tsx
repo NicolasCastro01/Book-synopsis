@@ -15,30 +15,58 @@ export default function Home() {
 
   async function onSubmit(event) {
     event.preventDefault();
+
     try {
-      handleState('loading', true)
+      handleState('loading', true);
+      handleState('result', '');
+    
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ book: state.bookInput }),
-      });
+      })
 
-      const data = await response.json();
+      let finalText = ''
+
+      response.body
+      .pipeThrough(new TextDecoderStream())
+      .pipeTo(new WritableStream({
+        write(chunk){
+            try {
+              const chunkWithouPrefixData = chunk.replace(/^data: /, '').trim().concat('\n')
+              
+              if (isValidJson(chunkWithouPrefixData)) {
+                const parsedChunk = JSON.parse(chunkWithouPrefixData)
+                const text = parsedChunk.choices[0].text
+      
+                finalText += text;
+      
+                handleState('result', finalText)
+              } else {
+                handleState('bookInput', '');
+                handleState('loading', false)
+              }
+
+            } catch (error) {
+              console.error(`Error parsing JSON: ${error}`)
+            }
+          }
+        }))
+
       if (response.status !== 200) {
         throw new Error(`Request failed with status ${response.status}`);
       }
+    } catch(error) {} 
+  }
 
-      handleState('result', data.result)
-      handleState('bookInput', '');
-    } catch(error) {
-      console.error(error);
-      if(error.response.status === 504){
-        onSubmit(event)
-      }
-    } finally {
-      handleState('loading', false)
+  function isValidJson(jsonString){
+    try {
+      JSON.parse(jsonString)
+      return true
+    } catch (error) {
+      return false
     }
   }
 
