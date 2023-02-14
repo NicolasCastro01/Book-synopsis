@@ -1,7 +1,4 @@
-import { createReadStream } from "fs";
-import { TransformStream } from "node:stream/web";
 import { Configuration, OpenAIApi } from "openai";
-import { Readable, Transform } from "stream";
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -9,17 +6,11 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default async function (req, res) {
-
-  if(req.method === 'GET'){
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Access-Control-Allow-Origin': '*',
-      'Connection': 'keep-alive'
-    })
-    res.flushHeaders()
-    res.end()
-    return
-  }
+  res.writeHead(200, {
+    'Access-Control-Allow-Origin': '*',
+    'Connection': 'keep-alive'
+  })
+  res.flushHeaders()
 
   if (!configuration.apiKey) {
     res.status(500).json({
